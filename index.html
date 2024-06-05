@@ -261,7 +261,11 @@ const CalendarModule = () => {
                 };
 
                 const handleCredentialResponse = (response) => {
+                    console.log('Credential Response:', response);
                     console.log('Access Token:', response.access_token);
+                    if(access_token === null || access_token === undefined || access_token === '') {
+                        return;
+                    }
                     setToken(response.access_token);
                     setIsAuthenticated(true);
                     listUpcomingEvents(response.access_token);
