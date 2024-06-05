@@ -254,8 +254,11 @@ const CalendarModule = () => {
         clientId: CLIENT_ID,
         scope: SCOPES,
       }).then(() => {
-        gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
-        updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+        const authInstance = gapi.auth2.getAuthInstance();
+        authInstance.isSignedIn.listen(updateSigninStatus);
+        updateSigninStatus(authInstance.isSignedIn.get());
+      }).catch(error => {
+        console.error('Error initializing Google API client:', error);
       });
     };
 
@@ -277,7 +280,10 @@ const CalendarModule = () => {
         orderBy: 'startTime',
       }).then(response => {
         const events = response.result.items;
+        console.log('Events:', events);
         setEvents(events);
+      }).catch(error => {
+        console.error('Error fetching events:', error);
       });
     };
 
@@ -285,11 +291,19 @@ const CalendarModule = () => {
   }, []);
 
   const handleAuthClick = () => {
-    gapi.auth2.getAuthInstance().signIn();
+    gapi.auth2.getAuthInstance().signIn().catch(error => {
+      if (error.error === 'popup_closed_by_user') {
+        console.warn('User closed the popup without completing the sign-in.');
+      } else {
+        console.error('Error during sign-in:', error);
+      }
+    });
   };
 
   const handleSignoutClick = () => {
-    gapi.auth2.getAuthInstance().signOut();
+    gapi.auth2.getAuthInstance().signOut().catch(error => {
+      console.error('Error during sign-out:', error);
+    });
   };
 
   return (
