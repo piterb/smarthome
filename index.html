@@ -248,27 +248,32 @@ const CalendarModule = () => {
             React.useEffect(() => {
                 /* global google */
                 const handleClientLoad = () => {
-                    google.accounts.id.initialize({
+                    const tokenClient = google.accounts.oauth2.initTokenClient({
                         client_id: CLIENT_ID,
-                        callback: handleCredentialResponse,
-                        auto_select: false,
-                        prompt: 'consent'
+                        scope: SCOPES,
+                        callback: (tokenResponse) => {
+                            console.log('Token Response:', tokenResponse)
+                            const access_token = tokenResponse.access_token;
+                            console.log('Access Token:', access_token);
+
+                            if(access_token) {
+                              setToken(tokenResponse.access_token);
+                              setIsAuthenticated(true);
+                              listUpcomingEvents(tokenResponse.access_token);
+                            }
+                        },
                     });
+
+                    // Render the Google Sign-In button
                     google.accounts.id.renderButton(
                         document.getElementById('signInDiv'),
-                        { theme: 'outline', size: 'large' }
+                        { theme: 'outline', size: 'large', type: 'standard' }
                     );
-                };
 
-                const handleCredentialResponse = (response) => {
-                    console.log('Credential Response:', response);
-                    console.log('Access Token:', response.access_token);
-                    if(access_token === null || access_token === undefined || access_token === '') {
-                        return;
-                    }
-                    setToken(response.access_token);
-                    setIsAuthenticated(true);
-                    listUpcomingEvents(response.access_token);
+                    // Add a click handler to the button to initiate the OAuth2 flow
+                    document.getElementById('signInDiv').addEventListener('click', () => {
+                        tokenClient.requestAccessToken();
+                    });
                 };
 
                 handleClientLoad();
@@ -326,6 +331,7 @@ const CalendarModule = () => {
                 </div>
             );
         };
+
 
 
 
