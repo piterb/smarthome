@@ -239,10 +239,12 @@ const WeatherRadarModule = () => {
   );
 };
 
+
 const CalendarModule = () => {
   const [events, setEvents] = React.useState([]);
   const [isAuthenticated, setIsAuthenticated] = React.useState(false);
   const [token, setToken] = React.useState('');
+  const [scopesVerified, setScopesVerified] = React.useState(false);
 
   React.useEffect(() => {
     /* global google */
@@ -260,20 +262,26 @@ const CalendarModule = () => {
 
     const handleCredentialResponse = (response) => {
       console.log('Encoded JWT ID token: ' + response.credential);
-      const decodedToken = parseJwt(response.credential);
-      console.log('Decoded Token:', decodedToken);
       setToken(response.credential);
       setIsAuthenticated(true);
-      listUpcomingEvents(response.credential);
+      verifyScopes(response.credential);
     };
 
-    const parseJwt = (token) => {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-      }).join(''));
-      return JSON.parse(jsonPayload);
+    const verifyScopes = (token) => {
+      fetch(`https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${token}`)
+        .then(response => response.json())
+        .then(data => {
+          console.log('Token info:', data);
+          if (data.scope.includes(SCOPES)) {
+            setScopesVerified(true);
+            listUpcomingEvents(token);
+          } else {
+            console.error('Required scopes not granted');
+          }
+        })
+        .catch(error => {
+          console.error('Error verifying token:', error);
+        });
     };
 
     handleClientLoad();
@@ -331,6 +339,7 @@ const CalendarModule = () => {
     </div>
   );
 };
+
 
 
 const latLonToTile = (lat, lon, zoom) => {
