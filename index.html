@@ -251,45 +251,20 @@ const CalendarModule = () => {
                     google.accounts.id.initialize({
                         client_id: CLIENT_ID,
                         callback: handleCredentialResponse,
+                        auto_select: false,
+                        prompt: 'consent'
                     });
                     google.accounts.id.renderButton(
                         document.getElementById('signInDiv'),
                         { theme: 'outline', size: 'large' }
                     );
-                    //google.accounts.id.prompt(); // Automatically prompt the user to sign in
                 };
 
                 const handleCredentialResponse = (response) => {
-                    console.log('Encoded ID token: ' + response.credential);
-                    // Exchange ID token for access token
-                    fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${response.credential}`)
-                        .then(res => res.json())
-                        .then(data => {
-                            if (data.aud === CLIENT_ID) {
-                                // Successfully verified ID token
-                                fetch(`https://oauth2.googleapis.com/token`, {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/x-www-form-urlencoded'
-                                    },
-                                    body: `client_id=${CLIENT_ID}&grant_type=urn:ietf:params:oauth:grant-type:device_code&device_code=${data.sub}`
-                                })
-                                .then(res => res.json())
-                                .then(tokenResponse => {
-                                    setToken(tokenResponse.access_token);
-                                    setIsAuthenticated(true);
-                                    listUpcomingEvents(tokenResponse.access_token);
-                                })
-                                .catch(error => {
-                                    console.error('Error exchanging ID token for access token:', error);
-                                });
-                            } else {
-                                console.error('ID token verification failed');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error verifying ID token:', error);
-                        });
+                    console.log('Access Token:', response.access_token);
+                    setToken(response.access_token);
+                    setIsAuthenticated(true);
+                    listUpcomingEvents(response.access_token);
                 };
 
                 handleClientLoad();
