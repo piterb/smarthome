@@ -16,7 +16,6 @@
 
   <script type="text/babel">
   const CLIENT_ID = '330408379765-sd6nljvet6d83ccihrp2on9eueqf3604.apps.googleusercontent.com';
-  const DISCOVERY_DOCS = ['https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest'];
   const SCOPES = 'https://www.googleapis.com/auth/calendar.readonly';
 
 	const ClockModule = () => {
@@ -256,13 +255,25 @@ const CalendarModule = () => {
         document.getElementById('signInDiv'),
         { theme: 'outline', size: 'large' }
       );
+      google.accounts.id.prompt(); // Automatically prompt the user to sign in
     };
 
     const handleCredentialResponse = (response) => {
       console.log('Encoded JWT ID token: ' + response.credential);
+      const decodedToken = parseJwt(response.credential);
+      console.log('Decoded Token:', decodedToken);
       setToken(response.credential);
       setIsAuthenticated(true);
       listUpcomingEvents(response.credential);
+    };
+
+    const parseJwt = (token) => {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      return JSON.parse(jsonPayload);
     };
 
     handleClientLoad();
@@ -277,7 +288,12 @@ const CalendarModule = () => {
         },
       }
     )
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok ' + response.statusText);
+        }
+        return response.json();
+      })
       .then((data) => {
         const events = data.items;
         console.log('Events:', events);
