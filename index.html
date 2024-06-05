@@ -264,11 +264,11 @@ const CalendarModule = () => {
                         },
                     });
 
-                    // Render the Google Sign-In button
-                    google.accounts.id.renderButton(
-                        document.getElementById('signInDiv'),
-                        { theme: 'outline', size: 'large', type: 'standard' }
-                    );
+                    // Render a custom sign-in button and attach a click handler
+                    const signInButton = document.getElementById('signInDiv');
+                    signInButton.addEventListener('click', () => {
+                        tokenClient.requestAccessToken();
+                    });
 
                     // Add a click handler to the button to initiate the OAuth2 flow
                     document.getElementById('signInDiv').addEventListener('click', () => {
@@ -307,30 +307,31 @@ const CalendarModule = () => {
             const handleSignoutClick = () => {
                 setIsAuthenticated(false);
                 setEvents([]);
-                google.accounts.id.disableAutoSelect();
             };
 
             return (
-                <div>
-                    <h3>Upcoming Events</h3>
-                    {!isAuthenticated ? (
-                        <div id="signInDiv"></div>
-                    ) : (
-                        <div>
-                            <button onClick={handleSignoutClick}>Sign out</button>
-                            <ul>
-                                {events.map(event => (
-                                    <li key={event.id}>
-                                        <div>{new Date(event.start.dateTime || event.start.date).toLocaleDateString()}</div>
-                                        <div>{new Date(event.start.dateTime || event.start.date).toLocaleTimeString()} - {event.summary}</div>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
-                </div>
+              <div className="bg-gray-800 p-4 rounded-md">
+                <h3 className="text-xl mb-2">Upcoming Events</h3>
+                {!isAuthenticated ? (
+                  <div>
+                      <button id="signInDiv" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Sign in with Google</button>
+                  </div>
+                ) : (
+                  <div>
+                    <button onClick={handleSignoutClick} className="bg-red-500 text-white p-2 rounded mb-4">Sign out</button>
+                    <ul className="grid grid-cols-5 gap-2">
+                      {events.map(event => (
+                        <li key={event.id} className="col-span-5">
+                          <div className="text-right">{new Date(event.start.dateTime || event.start.date).toLocaleDateString()}</div>
+                          <div className="text-left col-span-4">{new Date(event.start.dateTime || event.start.date).toLocaleTimeString()} - {event.summary}</div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
             );
-        };
+          };
 
 
 
