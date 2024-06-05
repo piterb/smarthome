@@ -260,6 +260,7 @@ const CalendarModule = () => {
     };
 
     const updateSigninStatus = (isSignedIn) => {
+      console.log('isSignedIn:', isSignedIn);
       setIsAuthenticated(isSignedIn);
       if (isSignedIn) {
         listUpcomingEvents();
