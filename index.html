@@ -241,98 +241,112 @@ const WeatherRadarModule = () => {
 
 
 const CalendarModule = () => {
-  const [events, setEvents] = React.useState([]);
-  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
-  const [token, setToken] = React.useState('');
-  const [scopesVerified, setScopesVerified] = React.useState(false);
+            const [events, setEvents] = React.useState([]);
+            const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+            const [token, setToken] = React.useState('');
 
-  React.useEffect(() => {
-    /* global google */
-    const handleClientLoad = () => {
-      google.accounts.id.initialize({
-        client_id: CLIENT_ID,
-        callback: handleCredentialResponse,
-      });
-      google.accounts.id.renderButton(
-        document.getElementById('signInDiv'),
-        { theme: 'outline', size: 'large' }
-      );
-      google.accounts.id.prompt(); // Automatically prompt the user to sign in
-    };
+            React.useEffect(() => {
+                /* global google */
+                const handleClientLoad = () => {
+                    google.accounts.id.initialize({
+                        client_id: CLIENT_ID,
+                        callback: handleCredentialResponse,
+                    });
+                    google.accounts.id.renderButton(
+                        document.getElementById('signInDiv'),
+                        { theme: 'outline', size: 'large' }
+                    );
+                    //google.accounts.id.prompt(); // Automatically prompt the user to sign in
+                };
 
-    const handleCredentialResponse = (response) => {
-      console.log('Encoded JWT ID token: ' + response.credential);
-      setToken(response.credential);
-      setIsAuthenticated(true);
-      verifyScopes(response.credential);
-    };
+                const handleCredentialResponse = (response) => {
+                    console.log('Encoded ID token: ' + response.credential);
+                    // Exchange ID token for access token
+                    fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${response.credential}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.aud === CLIENT_ID) {
+                                // Successfully verified ID token
+                                fetch(`https://oauth2.googleapis.com/token`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/x-www-form-urlencoded'
+                                    },
+                                    body: `client_id=${CLIENT_ID}&grant_type=urn:ietf:params:oauth:grant-type:device_code&device_code=${data.sub}`
+                                })
+                                .then(res => res.json())
+                                .then(tokenResponse => {
+                                    setToken(tokenResponse.access_token);
+                                    setIsAuthenticated(true);
+                                    listUpcomingEvents(tokenResponse.access_token);
+                                })
+                                .catch(error => {
+                                    console.error('Error exchanging ID token for access token:', error);
+                                });
+                            } else {
+                                console.error('ID token verification failed');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error verifying ID token:', error);
+                        });
+                };
 
-    const verifyScopes = (token) => {
-      fetch(`https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=${token}`)
-        .then(response => response.json())
-        .then(data => {
-          console.log('Token info:', data);
-        })
-        .catch(error => {
-          console.error('Error verifying token:', error);
-        });
-    };
+                handleClientLoad();
+            }, []);
 
-    handleClientLoad();
-  }, []);
+            const listUpcomingEvents = (token) => {
+                fetch(
+                    `https://www.googleapis.com/calendar/v3/calendars/primary/events?maxResults=10&orderBy=startTime&singleEvents=true&timeMin=${new Date().toISOString()}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                )
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok ' + response.statusText);
+                        }
+                        return response.json();
+                    })
+                    .then((data) => {
+                        const events = data.items;
+                        console.log('Events:', events);
+                        setEvents(events);
+                    })
+                    .catch((error) => {
+                        console.error('Error fetching events:', error);
+                    });
+            };
 
-  const listUpcomingEvents = (token) => {
-    fetch(
-      `https://www.googleapis.com/calendar/v3/calendars/primary/events?maxResults=10&orderBy=startTime&singleEvents=true&timeMin=${new Date().toISOString()}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    )
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok ' + response.statusText);
-        }
-        return response.json();
-      })
-      .then((data) => {
-        const events = data.items;
-        console.log('Events:', events);
-        setEvents(events);
-      })
-      .catch((error) => {
-        console.error('Error fetching events:', error);
-      });
-  };
+            const handleSignoutClick = () => {
+                setIsAuthenticated(false);
+                setEvents([]);
+                google.accounts.id.disableAutoSelect();
+            };
 
-  const handleSignoutClick = () => {
-    setIsAuthenticated(false);
-    setEvents([]);
-    google.accounts.id.disableAutoSelect();
-  };
-
-  return (
-    <div className="bg-gray-800 p-4 rounded-md">
-      <h3 className="text-xl mb-2">Upcoming Events</h3>
-      {!isAuthenticated ? (
-        <div id="signInDiv"></div>
-      ) : (
-        <div>
-          <button onClick={handleSignoutClick} className="bg-red-500 text-white p-2 rounded mb-4">Sign out</button>
-          <ul className="grid grid-cols-5 gap-2">
-            {events.map(event => (
-              <li key={event.id} className="col-span-5">
-                <div className="text-right">{new Date(event.start.dateTime || event.start.date).toLocaleDateString()}</div>
-                <div className="text-left col-span-4">{new Date(event.start.dateTime || event.start.date).toLocaleTimeString()} - {event.summary}</div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
-  );
-};
+            return (
+                <div>
+                    <h3>Upcoming Events</h3>
+                    {!isAuthenticated ? (
+                        <div id="signInDiv"></div>
+                    ) : (
+                        <div>
+                            <button onClick={handleSignoutClick}>Sign out</button>
+                            <ul>
+                                {events.map(event => (
+                                    <li key={event.id}>
+                                        <div>{new Date(event.start.dateTime || event.start.date).toLocaleDateString()}</div>
+                                        <div>{new Date(event.start.dateTime || event.start.date).toLocaleTimeString()} - {event.summary}</div>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                </div>
+            );
+        };
 
 
 
