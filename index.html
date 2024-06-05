@@ -309,6 +309,19 @@ const CalendarModule = () => {
                 setEvents([]);
             };
 
+            const formatDate = (date) => {
+                const options = { day: '2-digit', month: 'short' };
+                return new Date(date).toLocaleDateString(undefined, options).toUpperCase();
+            };
+
+            const formatTime = (date) => {
+                return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            };
+
+            const formatDay = (date) => {
+                return new Date(date).toLocaleDateString(undefined, { weekday: 'short' }).toUpperCase();
+            };
+
             return (
               <div className="bg-gray-800 p-4 rounded-md">
                     <h3 className="text-xl mb-2 text-white">Upcoming Events</h3>
