@@ -95,33 +95,34 @@ const CalendarModule = () => {
             };
 
             return (
-              <div className="bg-gray-800 p-4 rounded-md">
-                <div className="flex justify-between items-center mb-2">
-                <h3 className="text-xl text-white">Upcoming Events</h3>
-                </div>
-                    {!isAuthenticated ? (
-                        <div>
-                            <button onClick={handleSigninClick} id="signInDiv" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                Sign in with Google
-                            </button>
-                        </div>
-                    ) : (
-                        <div>
-                            <button onClick={handleSignoutClick} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-2 rounded text-sm">
-                                Sign out
-                            </button>
-                            <ul className="space-y-2">
-                                {events.map(event => (
-                                    <li key={event.id} className="grid grid-cols-4 items-center border-b border-gray-600 pb-2 gap-4">
-                                        <div className="text-right text-white text-2xl">{formatDayOfMonth(event.start.dateTime || event.start.date)}</div>
-                                        <div className="text-left text-white">{formatMonthAndDay(event.start.dateTime || event.start.date)}</div>
-                                        <div className="text-left text-white">{formatTime(event.start.dateTime || event.start.date)} - {formatTime(event.end.dateTime || event.end.date)}</div>
-                                        <div className="text-left text-white">{event.summary}</div>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
-                </div>
+                <div className="bg-gray-800 p-4 rounded-md">
+    <div className="flex justify-between items-center mb-2">
+        <h3 className="text-xl text-white">Upcoming Events</h3>
+    </div>
+    {!isAuthenticated ? (
+        <div>
+            <button onClick={handleSigninClick} id="signInDiv" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Sign in with Google
+            </button>
+        </div>
+    ) : (
+        <div>
+            <button onClick={handleSignoutClick} className="bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-2 rounded text-sm">
+                Sign out
+            </button>
+            <ul className="space-y-2">
+                {events.map(event => (
+                    <li key={event.id} className="grid grid-cols-12 items-center border-b border-gray-600 pb-2 gap-2">
+                        <div className="text-right text-white text-2xl col-span-1">{formatDayOfMonth(event.start.dateTime || event.start.date)}</div>
+                        <div className="text-left text-white col-span-2">{formatMonthAndDay(event.start.dateTime || event.start.date)}</div>
+                        <div className="text-left text-white col-span-3">{formatTime(event.start.dateTime || event.start.date)} - {formatTime(event.end.dateTime || event.end.date)}</div>
+                        <div className="text-left text-white col-span-6">{event.summary}</div>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    )}
+</div>
+
             );
           };
