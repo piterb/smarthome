@@ -247,6 +247,13 @@ const CalendarModule = () => {
             React.useEffect(() => {
                 /* global google */
                 const handleClientLoad = () => {
+                    const savedToken = localStorage.getItem('accessToken');
+                    if (savedToken) {
+                        setToken(savedToken);
+                        setIsAuthenticated(true);
+                        listUpcomingEvents(savedToken);
+                    }
+
                     const tokenClient = google.accounts.oauth2.initTokenClient({
                         client_id: CLIENT_ID,
                         scope: SCOPES,
@@ -256,6 +263,7 @@ const CalendarModule = () => {
                             console.log('Access Token:', access_token);
 
                             if(access_token) {
+                              localStorage.setItem('accessToken', tokenResponse.access_token);
                               setToken(tokenResponse.access_token);
                               setIsAuthenticated(true);
                               listUpcomingEvents(tokenResponse.access_token);
@@ -304,6 +312,7 @@ const CalendarModule = () => {
             };
 
             const handleSignoutClick = () => {
+                localStorage.removeItem('accessToken');
                 setIsAuthenticated(false);
                 setEvents([]);
             };
