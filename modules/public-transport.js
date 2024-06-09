@@ -16,13 +16,13 @@ const PublicTransportModule = ({ stationId }) => {
         {`
           @media (max-width: 1024px) {
             .iframe-public-transport {
-              height: 400px; /* Height for tablets */
+              height: 300px; /* Height for tablets */
             }
           }
 
           @media (max-width: 768px) {
             .iframe-public-transport {
-              height: 300px; /* Height for small tablets and large phones */
+              height: 200px; /* Height for small tablets and large phones */
             }
           }
 
