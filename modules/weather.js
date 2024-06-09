@@ -64,9 +64,9 @@ const WeatherModule = () => {
         80: 'Slight showers',
         81: 'Moderate showers',
         82: 'Violent showers',
-        95: 'Slight or moderate thunderstorm',
-        96: 'Thunderstorm with slight hail',
-        99: 'Thunderstorm with heavy hail',
+        95: 'Thunderstorm',
+        96: 'Thunderstorm / slight hail',
+        99: 'Thunderstorm / heavy hail',
       };
       return descriptionMap[code] || 'Unknown';
     };

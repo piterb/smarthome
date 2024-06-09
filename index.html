@@ -14,9 +14,10 @@
   <div id="root"></div>
 
   <script type="text/babel" src="modules/clock.js?v=1"></script>
-  <script type="text/babel" src="modules/weather.js?v=1"></script>
+  <script type="text/babel" src="modules/weather.js?v=2"></script>
   <script type="text/babel" src="modules/weather-radar.js?v=1"></script>
-  <script type="text/babel" src="modules/calendar.js?v=9"></script>
+  <script type="text/babel" src="modules/calendar.js?v=10"></script>
+  <script type="text/babel" src="modules/public-transport.js?v=4"></script>
 
   <script type="text/babel">
 
@@ -35,8 +36,19 @@
             </div>
 
             {/* Right Column */}
-            <div className="bg-gray-800 p-4 rounded-md">
-            <CalendarModule />
+            <div className="space-y-4">
+              {/* Calendar Module */}
+              <CalendarModule />
+              
+              {/* Public Transport Module */}
+              <PublicTransportModule stationId={75}/>
+
+              {/* Public Transport Module */}
+              <PublicTransportModule stationId={304}/>
+
+              {/* Public Transport Module */}
+              <PublicTransportModule stationId={190}/>
+
             </div>
 
           </div>
