@@ -139,7 +139,7 @@ const WeatherModule = () => {
           <div className="flex items-center">
             <img src="https://img.icons8.com/ios-filled/50/FFFFFF/windsock.png" alt="Wind" className="w-6 h-6 mr-1" />
             <p>{weatherData.winddirection}°/</p>
-            <p>{weatherData.windspeed} {weatherDataUnits.windspeed}</p>
+            <p>{Math.round(weatherData.windspeed)} {weatherDataUnits.windspeed}</p>
           </div>
           <div className="flex items-center">
             <img src="https://img.icons8.com/ios-filled/50/FFFFFF/pressure.png" alt="Pressure" className="w-6 h-6 mr-1" />
