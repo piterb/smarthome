@@ -2,6 +2,7 @@ const { useState, useEffect } = React;
 
 const WeatherModule = () => {
     const [weatherData, setWeatherData] = useState(null);
+    const [weatherDataUnits, setWeatherDataUnits] = useState(null);
     const [forecastData, setForecastData] = useState(null);
   
     useEffect(() => {
@@ -12,6 +13,7 @@ const WeatherModule = () => {
           );
           const data = await response.json();
           setWeatherData(data.current_weather);
+          setWeatherDataUnits(data.current_weather_units);
           setForecastData(data.hourly);
         } catch (error) {
           console.error("Error fetching weather data:", error);
@@ -137,7 +139,7 @@ const WeatherModule = () => {
           <div className="flex items-center">
             <img src="https://img.icons8.com/ios-filled/50/FFFFFF/windsock.png" alt="Wind" className="w-6 h-6 mr-1" />
             <p>{weatherData.winddirection}°/</p>
-            <p>{Math.round(weatherData.windspeed * 1.94384)} kt</p>
+            <p>{weatherData.windspeed} {weatherDataUnits.windspeed}</p>
           </div>
           <div className="flex items-center">
             <img src="https://img.icons8.com/ios-filled/50/FFFFFF/pressure.png" alt="Pressure" className="w-6 h-6 mr-1" />
